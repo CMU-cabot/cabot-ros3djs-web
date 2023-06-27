@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.89.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/eventemitter2@6.4/lib/eventemitter2.js"></script>
+<script src="./js/roslib.js"></script>
+<script src="./js/ros3d.js"></script>
+<script src="./js/ros3d_cabot.js"></script>
+
+
+</head>
+
+<body>
+  <p>
+    <input type="text" placeholder="ws://localhost:9091" id="hostText">
+    <input type="button" value="Connection" id="ConnectionButton">
+  </p>
+  <p id="msg"></p>
+
+  <div id="map"></div>
+</body>
+
+<script>
+  /**
+   * Setup all visualization elements when the page is loaded.
+   */
+  let hostText = document.getElementById('hostText');
+  hostText.value = "ws://localhost:9091";
+  let msg =  document.getElementById('msg');
+  let ConnectionButton = document.getElementById('ConnectionButton');
+  ConnectionButton.addEventListener('click', buttonClick);
+
+  function buttonClick() {
+    // Connect to ROS.
+    var ros = new ROSLIB.Ros({
+      // set this to false to use the new service interface to
+      // tf2_web_republisher. true is the default and means roslibjs
+      // will use the action interface
+      groovyCompatibility : false
+    });
+
+	  // If there is an error on the backend, an 'error' emit will be emitted.
+	  ros.on('error', function(error) {
+		  console.log(error);
+		  msg.innerText = error;
+	  });
+
+	  // Find out exactly when we made a connection.
+	  ros.on('connection', function() {
+		  console.log('Connection made!');
+		  msg.innerText = 'Connection made!';
+
+		  topicInit(ros);
+	  });
+
+	  ros.on('close', function() {
+		  console.log('Connection closed.');
+		  msg.innerText = 'Connection closed.';
+	  });
+
+    // Create a connection to the rosbridge WebSocket server.
+    ros.connect(hostText.value);    
+  }
+  
+  function topicInit(ros) {
+
+    // Create the main viewer.
+    var viewer = new ROS3D.Viewer({
+      divID : 'map',
+      width : window.innerWidth,
+      height : window.innerHeight,
+      background : '#808080',
+      antialias : true,
+      cameraPose : {x: 0, y: -1, z: 150}
+    })
+
+    // Setup the marker client.
+    var gridClient = new ROS3D.OccupancyGridClient({
+      ros : ros,
+      rootObject : viewer.scene,
+      cntinuous: true,
+      compression : ' '
+    });
+
+    // Setup a client to listen to TFs.
+    var tfClient = new ROSLIB.TFClient({
+      ros : ros,
+      angularThres : 0.01,
+      transThres : 0.01,
+      rate : 10.0,
+      updateDelay : 500,
+      fixedFrame : '/map'
+    });
+
+    // Setup the marker client.
+    var laserScan = new ROS3D.LaserScan({
+      ros : ros,
+      topic : '/scan',
+      tfClient : tfClient,
+      compression : ' ',
+      rootObject : viewer.scene,
+      material : { size : 1, color : 0xff00ff }
+    });
+
+    // Setup the marker client.
+    var path = new ROS3D.Path({
+      ros : ros,
+      topic : '/path',
+      tfClient : tfClient,
+      rootObject : viewer.scene,
+      color : 0x0000ff
+    });
+
+    // Setup the marker client.
+    var pose = new ROS3D.PoseLog({
+      ros : ros,
+      topic : '/cabot/pose_log',
+      tfClient : tfClient,
+      rootObject : viewer.scene,
+      color : 0xff0000,
+      length : 1.2,
+      headLength : 0.6,
+      shaftDiameter : 0.1,
+      headDiameter : 1.2     
+    });
+
+    // Setup the marker client.
+    var people = new ROS3D.People({
+      ros : ros,
+      topic : '/people',
+      tfClient : tfClient,
+      rootObject : viewer.scene,
+      color : 0x0000ff,
+      radius : 0.5
+    });
+
+}
+</script>
+
+
+</html>
