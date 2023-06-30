@@ -55954,6 +55954,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	    this.scale.x = info.resolution;
 	    this.scale.y = info.resolution;
 
+	    var data = message.data;
 	    // update the texture (after the the super call and this are accessible)
 	    this.color = color;
 	    this.material = material;
@@ -55966,26 +55967,16 @@ var ROS3D = (function (exports, ROSLIB) {
 	        var invRow = (height - row - 1);
 	        var mapI = col + (invRow * width);
 	        // determine the value
-	        var data = message.data[mapI];
-	        var val;
-	        if (data === 100) {
-	          val = 0;
-	        } else if (data === 0) {
-	          val = 255;
-	        } else {
-	          val = 127;
-	        }
+	        var val = this.getValue(mapI, invRow, col, data);
+
+	        // determine the color
+	        var color = this.getColor(mapI, invRow, col, val);
 
 	        // determine the index into the image data array
 	        var i = (col + (row * width)) * 4;
-	        // r
-	        imageData[i] = (val * this.color.r) / 255,
-	        // g
-	        imageData[++i] = (val * this.color.g) / 255;
-	        // b
-	        imageData[++i] = (val * this.color.b) / 255;
-	        // a
-	        imageData[++i] = 255;
+
+	        // copy the color
+	        imageData.set(color, i);
 	      }
 	    }
 
@@ -56020,10 +56011,18 @@ var ROS3D = (function (exports, ROSLIB) {
 	   * @returns r,g,b,a array of values from 0 to 255 representing the color values for each channel
 	   */
 	  getColor(index, row, col, value) {
+	    var scale;
+	    if (value === 100) {
+	      scale = 0;
+	    } else if (value === 0) {
+	      scale = 255;
+	    } else {
+	      scale = 127;
+	    }
 	    return [
-	      (value * this.color.r) / 255,
-	      (value * this.color.g) / 255,
-	      (value * this.color.b) / 255,
+	      (scale * this.color.r) / 255,
+	      (scale * this.color.g) / 255,
+	      (scale * this.color.b) / 255,
 	      255
 	    ];
 	  };
