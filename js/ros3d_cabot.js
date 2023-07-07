@@ -56,9 +56,10 @@ ROS3D.PoseLog.prototype.subscribe = function(){
 };
 
 ROS3D.PoseLog.prototype.processMessage = function(message){
-  for(let i = 0; i < this.poses.length - 1; i++) {
-    this.poses[i].unsubscribeTf();
-    this.rootObject.remove(this.poses[i]);
+  if (this.poses.length > 1) {
+    this.poses[0].unsubscribeTf();
+    this.rootObject.remove(this.poses[0]);
+    this.poses.shift();
   }
 
   this.options.origin = new THREE.Vector3( message.pose.position.x, message.pose.position.y,
