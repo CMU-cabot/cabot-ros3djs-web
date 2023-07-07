@@ -60,7 +60,7 @@
 	  });
 
     // Create a connection to the rosbridge WebSocket server.
-    ros.connect(hostText.value);    
+    ros.connect(hostText.value);
   }
   
   function topicInit(ros) {
@@ -119,10 +119,10 @@
       tfClient : tfClient,
       rootObject : viewer.scene,
       color : 0xff0000,
-      length : 1.2,
-      headLength : 0.6,
-      shaftDiameter : 0.1,
-      headDiameter : 1.2     
+      length : 2.0,
+      headLength : 1.0,
+      shaftDiameter : 0.5,
+      headDiameter : 1.5
     });
 
     // Setup the marker client.
@@ -139,4 +139,3 @@
 </script>
 
 </html>
-
