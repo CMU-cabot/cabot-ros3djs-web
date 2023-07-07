@@ -58403,7 +58403,7 @@ var ROS3D = (function (exports, ROSLIB) {
 
 	  /**
 	   * Traverses the given object and makes every object that's a Mesh,
-	   * Line or Sprite invisible. Also saves the previous visibility state
+	   * Line, Sprite or points invisible. Also saves the previous visibility state
 	   * so we can restore it later.
 	   *
 	   * @param scene - the object to traverse
@@ -58411,7 +58411,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	  makeEverythingInvisible(scene) {
 	    scene.traverse(function(currentObject) {
 	      if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
-	           || currentObject instanceof THREE.Sprite ) {
+	           || currentObject instanceof THREE.Sprite || currentObject instanceof THREE.Points ) {
 	        currentObject.previousVisibility = currentObject.visible;
 	        currentObject.visible = false;
 	      }
@@ -58428,7 +58428,7 @@ var ROS3D = (function (exports, ROSLIB) {
 	  makeHighlightedVisible(scene) {
 	    var makeVisible = function(currentObject) {
 	        if ( currentObject instanceof THREE.Mesh || currentObject instanceof THREE.Line
-	             || currentObject instanceof THREE.Sprite ) {
+	             || currentObject instanceof THREE.Sprite || currentObject instanceof THREE.Points ) {
 	          currentObject.visible = true;
 	        }
 	    };
